@@ -1,0 +1,33 @@
+<a href="{{ product.url | within: collection }}" class="grid-product__meta"> somecode </a>
+
+// Add this code below a href ".grid-product__meta"
+
+{% comment %} un-comment this condition if you dont want to show addto cart button other than collection grid {% if template contains 'collection' %}{%endif%} {% endcomment %}
+{%- assign current_variant = product.selected_or_first_available_variant -%}
+<div itemscope="" itemtype="http://schema.org/Product" id="GridProductSection--{{ product.id }}" data-section-id="{{ product.id }}" data-section-type="product-template" data-enable-history-state="false" data-featured-product="true">
+      {% capture "form_classes" %}product-single__form{% if product.has_only_default_variant %} product-single__form--no-variants{% endif %}{%- endcapture %}
+      {% capture "form_id" %}AddToCartForm--{{ product.id }}{%- endcapture %}
+      {% form 'product', product, class:form_classes, id:form_id, data-product-form: '' %}
+      <select name="id" id="ProductSelect--{{ product.id }}" class="product-single__variants no-js">
+        {% for variant in product.variants %}
+        {% if variant.available %}
+        <option{% if variant == product.selected_or_first_available_variant %} selected="selected" {% endif %} data-sku="{{ variant.sku }}" value="{{ variant.id }}">{{ variant.title }} - {{ variant.price | money_with_currency }}</option>{% else %}
+        <option disabled="disabled">{{ variant.title }} - {{ 'products.product.sold_out' | t }}</option>
+        {% endif %}
+        {% endfor %}
+      </select>
+      <center><input min="1" type="number" id="quantity--{{ product.id }}" name="quantity" value="1"/></center>
+      <div class="product-single__add-to-cart">
+        <button type="submit" name="add" id="AddToCart--{{ product.id }}" class="btn btn--add-to-cart"{% unless current_variant.available %} disabled="disabled"{% endunless %}>
+          <span class="btn__text">{% if current_variant.available %}
+            {{ 'products.product.add_to_cart' | t }}{% else %}{{ 'products.product.sold_out' | t }}{% endif %}
+          </span>
+        </button>
+      </div>
+      {% endform %}
+      {% unless product.empty == empty %}
+      <script type="application/json" id="ProductJson-{{ product.id }}">
+          {{ product | json }}
+      </script>
+      {% endunless %}
+</div>
